@@ -76,7 +76,10 @@ class TwoLayerNet(object):
     # Store the result in the scores variable, which should be an array of      #
     # shape (N, C).                                                             #
     #############################################################################
-    pass
+    preH = X.dot(W1) + b1 # before activation
+    H = np.maximum(np.zeros_like(preH), preH) #activation map
+    scores = H.dot(W2) + b2
+
     #############################################################################
     #                              END OF YOUR CODE                             #
     #############################################################################
@@ -93,7 +96,13 @@ class TwoLayerNet(object):
     # in the variable loss, which should be a scalar. Use the Softmax           #
     # classifier loss.                                                          #
     #############################################################################
-    pass
+    scores -= scores.max(axis=1)[:, np.newaxis]
+    scores_exp = np.exp(scores)
+    sum_scores = np.sum(scores_exp, axis=1)
+    loss_i = scores_exp[np.arange(N), y]/sum_scores # loss for every data point
+
+    loss = np.sum(-np.log(loss_i))/N #accumulated loss
+    loss += reg * (np.sum(W1**2) + np.sum(W2**2))
     #############################################################################
     #                              END OF YOUR CODE                             #
     #############################################################################
@@ -105,7 +114,21 @@ class TwoLayerNet(object):
     # and biases. Store the results in the grads dictionary. For example,       #
     # grads['W1'] should store the gradient on W1, and be a matrix of same size #
     #############################################################################
-    pass
+    dSy = np.zeros_like(scores)
+    dSy[np.arange(N), y] = 1
+    dS = scores_exp / sum_scores[:, np.newaxis] - dSy
+    dS /= N
+    grads['W2'] = H.T.dot(dS) + 2*reg*W2 
+    grads['b2'] = np.ones((1, dS.shape[0])).dot(dS).squeeze()
+
+    dH = W2.dot(dS.T).T
+    mask = np.zeros_like(H)
+    mask[preH > 0] = 1
+    dpreH = mask * dH
+
+    grads['W1'] = X.T.dot(dpreH) + 2*reg*W1 
+    grads['b1'] = np.ones((1, dpreH.shape[0])).dot(dpreH).squeeze()
+    #print(grads['b1'].shape)
     #############################################################################
     #                              END OF YOUR CODE                             #
     #############################################################################
@@ -149,7 +172,9 @@ class TwoLayerNet(object):
       # TODO: Create a random minibatch of training data and labels, storing  #
       # them in X_batch and y_batch respectively.                             #
       #########################################################################
-      pass
+      ids = np.random.choice(np.arange(X.shape[0]), batch_size)
+      X_batch = X[ids, :]
+      y_batch = y[ids]
       #########################################################################
       #                             END OF YOUR CODE                          #
       #########################################################################
@@ -164,7 +189,10 @@ class TwoLayerNet(object):
       # using stochastic gradient descent. You'll need to use the gradients   #
       # stored in the grads dictionary defined above.                         #
       #########################################################################
-      pass
+      self.params['W1'] -= learning_rate*grads['W1']
+      self.params['W2'] -= learning_rate*grads['W2']
+      self.params['b1'] -= learning_rate*grads['b1']
+      self.params['b2'] -= learning_rate*grads['b2']
       #########################################################################
       #                             END OF YOUR CODE                          #
       #########################################################################
@@ -209,7 +237,11 @@ class TwoLayerNet(object):
     ###########################################################################
     # TODO: Implement this function; it should be VERY simple!                #
     ###########################################################################
-    pass
+    preH = X.dot(self.params['W1']) + self.params['b1'] # before activation
+    H = np.maximum(np.zeros_like(preH), preH) #activation map
+    scores = H.dot(self.params['W2']) + self.params['b2']
+    y_pred = np.argmax(scores, axis = 1)
+
     ###########################################################################
     #                              END OF YOUR CODE                           #
     ###########################################################################
