@@ -435,7 +435,12 @@ def conv_backward_naive(dout, cache):
     ###########################################################################
     # TODO: Implement the convolutional backward pass.                        #
     ###########################################################################
-    pass
+    db = np.sum(dout, axis = (0, 2, 3))
+    for n in range(N):
+        for c in range(C):
+            for i in range(H):
+                for j in range(W):
+                    dx[n, c, i, j] = np.sum(dout[n, :, i +]*w[:, ])
     ###########################################################################
     #                             END OF YOUR CODE                            #
     ###########################################################################
