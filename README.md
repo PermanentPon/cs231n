@@ -1,5 +1,5 @@
 ## CS231n Spring 2017 solutions
-These are my solutions for [CS231n Stanford class](http://cs231n.stanford.edu/index.html) assignments with answers to the inline questions. 
+These are my solutions for the [CS231n Stanford class](http://cs231n.stanford.edu/index.html) assignments with answers to the inline questions. 
 
 ## Structure
 * Assignment 1: k-Nearest Neighbor, SVM, two-layer neural network
